@@ -1,0 +1,63 @@
+from bs4 import BeautifulSoup as soup
+from urllib.request import urlopen
+import csv
+import itertools
+
+# Find the position of the period in the string
+def find_period(str):
+    per_index = str.index('.')
+    return per_index
+
+# Find the position of the nth space in the list
+def parse_sentences(text_str):
+    new_text_str = []
+    for i in range(len(text_str)):
+        new_text_str.append([])
+
+        for j in range(len(text_str[i])):
+            while len(text_str[i]) != 0:
+                per = find_period(text_str[i])
+                new_text_str.append(text_str[i][0: per + 1])
+                text_str[i] = text_str[i].replace(text_str[i][0: per + 1], ' ')
+
+            i = i + 1
+
+    print(new_text_str)
+
+
+wiki_url = 'https://en.wikipedia.org/wiki/Genome'
+wiki_data = urlopen(wiki_url) # open the wiki url to read it
+
+wiki_html = wiki_data.read() # read the data from the wiki url
+wiki_data.close() # close the connection
+
+page_soup = soup(wiki_html, 'html.parser')
+
+# Create a list to store the pure text from the page
+page_text = []
+
+# Create a .csv to store the text from the wiki page.
+csv_file = open('wiki_scraps.csv','w')
+writer = csv.writer(csv_file)
+
+# Write the headers for the .csv file
+writer.writerow(['Six Words', 'Important Words'])
+
+# Find all the paragraphs in the wiki page text
+# add their text to the list of six words
+for div in page_soup.findAll('p'):
+    page_text.append(div.text)
+
+for text_line in range(len(page_text)):
+    # text_line = six_word_sentence(text_line)
+    writer.writerow([page_text[text_line],])
+
+practice_str = ['This. That. Them.',
+                'This. That. Them',
+                'This. That. Them.',
+                'This. That. Them.',
+                'This. That. Them.']
+
+parse_sentences(practice_str)
+
+print(practice_str)
