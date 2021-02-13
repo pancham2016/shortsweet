@@ -1,31 +1,25 @@
 from bs4 import BeautifulSoup as soup
 from urllib.request import urlopen
 import csv
-import itertools
 
-# Find the position of the period in the string
-def find_period(str):
-    per_index = str.index('.')
-    return per_index
+# This program scrapes paragraph text from wikipedia files
+# and adds them sentence by sentence to a .csv file.
 
 # Find the position of the nth space in the list
 def parse_sentences(text_str):
-    new_text_str = []
-    for i in range(len(text_str)):
-        new_text_str.append([])
+    # Define list to hold the individual strings
+    split_text_strings = []
+    for i in text_str:
+        split_i = i.split('.')
+        for j in split_i:
+            last = len(split_i) - 1
+            if split_i[last] == '':
+                split_i.pop(last)
+            split_text_strings.append(j)
 
-        for j in range(len(text_str[i])):
-            while len(text_str[i]) != 0:
-                per = find_period(text_str[i])
-                new_text_str.append(text_str[i][0: per + 1])
-                text_str[i] = text_str[i].replace(text_str[i][0: per + 1], ' ')
+    return split_text_strings
 
-            i = i + 1
-
-    print(new_text_str)
-
-
-wiki_url = 'https://en.wikipedia.org/wiki/Genome'
+wiki_url = 'https://en.wikipedia.org/wiki/Giant_panda'
 wiki_data = urlopen(wiki_url) # open the wiki url to read it
 
 wiki_html = wiki_data.read() # read the data from the wiki url
@@ -48,16 +42,18 @@ writer.writerow(['Six Words', 'Important Words'])
 for div in page_soup.findAll('p'):
     page_text.append(div.text)
 
+# Remove utf-8 characters in a separate loop to
+# avoid O(n^2) algorithm
+# utf_scrubbed_chars = [char for char in page_text if ord(char) < 128]
+
+# Convert the utf_scrubbed_chars list of chars back into a list of sentences
+# scrubbed_page_text = ""
+# for char in utf_scrubbed_chars:
+    # scrubbed_page_text.append(char)
+
+# split the page_text into individual sentences
+page_text = parse_sentences(page_text)
+
 for text_line in range(len(page_text)):
-    # text_line = six_word_sentence(text_line)
     writer.writerow([page_text[text_line],])
 
-practice_str = ['This. That. Them.',
-                'This. That. Them',
-                'This. That. Them.',
-                'This. That. Them.',
-                'This. That. Them.']
-
-parse_sentences(practice_str)
-
-print(practice_str)
